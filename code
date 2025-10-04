@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Layer Encoder/Decoder</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            box-sizing: border-box;
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .step-indicator {
+            transition: all 0.3s ease;
+        }
+        .step-active {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+        .morse-font {
+            font-family: 'Courier New', monospace;
+            letter-spacing: 2px;
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-white mb-4">🔐 Multi-Layer Encoder/Decoder</h1>
+            <p class="text-white/80 text-lg">Caesar 13 → Binary → Morse → Hex</p>
+        </div>
+
+        <!-- Main Card -->
+        <div class="max-w-4xl mx-auto glass-effect rounded-2xl p-8 shadow-2xl">
+            <!-- Mode Toggle -->
+            <div class="flex justify-center mb-8">
+                <div class="bg-white/20 rounded-full p-1 flex">
+                    <button id="encodeBtn" class="px-6 py-2 rounded-full text-white font-medium transition-all duration-300 bg-white/30">
+                        🔒 Encode
+                    </button>
+                    <button id="decodeBtn" class="px-6 py-2 rounded-full text-white font-medium transition-all duration-300">
+                        🔓 Decode
+                    </button>
+                </div>
+            </div>
+
+            <!-- Process Steps Indicator -->
+            <div id="stepsContainer" class="mb-8">
+                <div class="flex justify-center items-center space-x-4 mb-6">
+                    <div class="step-indicator px-4 py-2 rounded-full text-white text-sm bg-white/20" data-step="1">Caesar 13</div>
+                    <div class="text-white">→</div>
+                    <div class="step-indicator px-4 py-2 rounded-full text-white text-sm bg-white/20" data-step="2">Binary</div>
+                    <div class="text-white">→</div>
+                    <div class="step-indicator px-4 py-2 rounded-full text-white text-sm bg-white/20" data-step="3">Morse</div>
+                    <div class="text-white">→</div>
+                    <div class="step-indicator px-4 py-2 rounded-full text-white text-sm bg-white/20" data-step="4">Hex</div>
+                </div>
+            </div>
+
+            <!-- Input Section -->
+            <div class="mb-6">
+                <label class="block text-white font-medium mb-2">Nhập văn bản:</label>
+                <textarea id="inputText" 
+                    class="w-full h-32 p-4 rounded-lg bg-white/20 text-white placeholder-white/60 border border-white/30 focus:border-white/60 focus:outline-none resize-none"
+                    placeholder="Nhập văn bản cần xử lý..."></textarea>
+            </div>
+
+            <!-- Process Button -->
+            <div class="text-center mb-6">
+                <button id="processBtn" 
+                    class="px-8 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold rounded-full hover:from-purple-600 hover:to-pink-600 transform hover:scale-105 transition-all duration-300 shadow-lg">
+                    <span id="processText">🔒 Encode</span>
+                </button>
+            </div>
+
+            <!-- Steps Display -->
+            <div id="stepsDisplay" class="space-y-4 mb-6 hidden">
+                <div class="step-result bg-white/10 rounded-lg p-4">
+                    <h3 class="text-white font-medium mb-2">Bước 1: <span id="step1Title">Caesar 13</span></h3>
+                    <div id="step1Result" class="text-white/80 font-mono text-sm break-all"></div>
+                </div>
+                <div class="step-result bg-white/10 rounded-lg p-4">
+                    <h3 class="text-white font-medium mb-2">Bước 2: <span id="step2Title">Binary</span></h3>
+                    <div id="step2Result" class="text-white/80 font-mono text-sm break-all"></div>
+                </div>
+                <div class="step-result bg-white/10 rounded-lg p-4">
+                    <h3 class="text-white font-medium mb-2">Bước 3: <span id="step3Title">Morse</span></h3>
+                    <div id="step3Result" class="text-white/80 morse-font text-sm break-all"></div>
+                </div>
+                <div class="step-result bg-white/10 rounded-lg p-4">
+                    <h3 class="text-white font-medium mb-2">Bước 4: <span id="step4Title">Hex</span></h3>
+                    <div id="step4Result" class="text-white/80 font-mono text-sm break-all"></div>
+                </div>
+            </div>
+
+            <!-- Final Result -->
+            <div class="mb-6">
+                <label class="block text-white font-medium mb-2">Kết quả:</label>
+                <div class="relative">
+                    <textarea id="outputText" 
+                        class="w-full h-32 p-4 rounded-lg bg-white/20 text-white border border-white/30 resize-none"
+                        readonly></textarea>
+                    <button id="copyBtn" 
+                        class="absolute top-2 right-2 px-3 py-1 bg-white/20 text-white text-sm rounded hover:bg-white/30 transition-colors">
+                        📋 Copy
+                    </button>
+                </div>
+            </div>
+
+            <!-- Clear Button -->
+            <div class="text-center">
+                <button id="clearBtn" 
+                    class="px-6 py-2 bg-white/20 text-white rounded-lg hover:bg-white/30 transition-colors">
+                    🗑️ Xóa tất cả
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Morse code mapping
+        const morseCode = {
+            'A': '.-', 'B': '-...', 'C': '-.-.', 'D': '-..', 'E': '.', 'F': '..-.',
+            'G': '--.', 'H': '....', 'I': '..', 'J': '.---', 'K': '-.-', 'L': '.-..',
+            'M': '--', 'N': '-.', 'O': '---', 'P': '.--.', 'Q': '--.-', 'R': '.-.',
+            'S': '...', 'T': '-', 'U': '..-', 'V': '...-', 'W': '.--', 'X': '-..-',
+            'Y': '-.--', 'Z': '--..', '0': '-----', '1': '.----', '2': '..---',
+            '3': '...--', '4': '....-', '5': '.....', '6': '-....', '7': '--...',
+            '8': '---..', '9': '----.', ' ': '/'
+        };
+
+        const reverseMorse = Object.fromEntries(Object.entries(morseCode).map(([k, v]) => [v, k]));
+
+        let isEncodeMode = true;
+
+        // DOM elements
+        const encodeBtn = document.getElementById('encodeBtn');
+        const decodeBtn = document.getElementById('decodeBtn');
+        const inputText = document.getElementById('inputText');
+        const outputText = document.getElementById('outputText');
+        const processBtn = document.getElementById('processBtn');
+        const processText = document.getElementById('processText');
+        const stepsDisplay = document.getElementById('stepsDisplay');
+        const copyBtn = document.getElementById('copyBtn');
+        const clearBtn = document.getElementById('clearBtn');
+
+        // Mode toggle
+        encodeBtn.addEventListener('click', () => {
+            isEncodeMode = true;
+            encodeBtn.classList.add('bg-white/30');
+            decodeBtn.classList.remove('bg-white/30');
+            processText.textContent = '🔒 Encode';
+            updateStepsOrder();
+        });
+
+        decodeBtn.addEventListener('click', () => {
+            isEncodeMode = false;
+            decodeBtn.classList.add('bg-white/30');
+            encodeBtn.classList.remove('bg-white/30');
+            processText.textContent = '🔓 Decode';
+            updateStepsOrder();
+        });
+
+        function updateStepsOrder() {
+            const steps = document.querySelectorAll('.step-indicator');
+            const stepTitles = ['step1Title', 'step2Title', 'step3Title', 'step4Title'];
+            
+            if (isEncodeMode) {
+                steps[0].textContent = 'Caesar 13';
+                steps[1].textContent = 'Binary';
+                steps[2].textContent = 'Morse';
+                steps[3].textContent = 'Hex';
+                document.getElementById('step1Title').textContent = 'Caesar 13';
+                document.getElementById('step2Title').textContent = 'Binary';
+                document.getElementById('step3Title').textContent = 'Morse';
+                document.getElementById('step4Title').textContent = 'Hex';
+            } else {
+                steps[0].textContent = 'Hex → Binary';
+                steps[1].textContent = 'Binary → Morse';
+                steps[2].textContent = 'Morse → Text';
+                steps[3].textContent = 'Caesar -13';
+                document.getElementById('step1Title').textContent = 'Hex → Binary';
+                document.getElementById('step2Title').textContent = 'Binary → Morse';
+                document.getElementById('step3Title').textContent = 'Morse → Text';
+                document.getElementById('step4Title').textContent = 'Caesar -13';
+            }
+        }
+
+        // Caesar cipher
+        function caesarCipher(text, shift) {
+            return text.replace(/[a-zA-Z]/g, function(char) {
+                const start = char <= 'Z' ? 65 : 97;
+                return String.fromCharCode(((char.charCodeAt(0) - start + shift + 26) % 26) + start);
+            });
+        }
+
+        // Text to binary
+        function textToBinary(text) {
+            return text.split('').map(char => 
+                char.charCodeAt(0).toString(2).padStart(8, '0')
+            ).join(' ');
+        }
+
+        // Binary to text
+        function binaryToText(binary) {
+            return binary.split(' ').map(bin => 
+                String.fromCharCode(parseInt(bin, 2))
+            ).join('');
+        }
+
+        // Text to morse
+        function textToMorse(text) {
+            return text.toUpperCase().split('').map(char => 
+                morseCode[char] || char
+            ).join(' ');
+        }
+
+        // Morse to text
+        function morseToText(morse) {
+            return morse.split(' ').map(code => 
+                reverseMorse[code] || code
+            ).join('');
+        }
+
+        // Text to hex
+        function textToHex(text) {
+            return text.split('').map(char => 
+                char.charCodeAt(0).toString(16).padStart(2, '0')
+            ).join(' ');
+        }
+
+        // Hex to text
+        function hexToText(hex) {
+            return hex.split(' ').map(h => 
+                String.fromCharCode(parseInt(h, 16))
+            ).join('');
+        }
+
+        // Process function
+        processBtn.addEventListener('click', () => {
+            const input = inputText.value.trim();
+            if (!input) {
+                alert('Vui lòng nhập văn bản!');
+                return;
+            }
+
+            stepsDisplay.classList.remove('hidden');
+            
+            if (isEncodeMode) {
+                // Encode: Caesar 13 → Binary → Morse → Hex
+                const step1 = caesarCipher(input, 13);
+                const step2 = textToBinary(step1);
+                const step3 = textToMorse(step2);
+                const step4 = textToHex(step3);
+
+                document.getElementById('step1Result').textContent = step1;
+                document.getElementById('step2Result').textContent = step2;
+                document.getElementById('step3Result').textContent = step3;
+                document.getElementById('step4Result').textContent = step4;
+                
+                outputText.value = step4;
+            } else {
+                // Decode: Hex → Morse → Binary → Caesar -13
+                try {
+                    const step1 = hexToText(input);
+                    const step2 = morseToText(step1);
+                    const step3 = binaryToText(step2);
+                    const step4 = caesarCipher(step3, -13);
+
+                    document.getElementById('step1Result').textContent = step1;
+                    document.getElementById('step2Result').textContent = step2;
+                    document.getElementById('step3Result').textContent = step3;
+                    document.getElementById('step4Result').textContent = step4;
+                    
+                    outputText.value = step4;
+                } catch (error) {
+                    alert('Dữ liệu đầu vào không hợp lệ cho việc decode!');
+                }
+            }
+
+            // Animate steps
+            const stepIndicators = document.querySelectorAll('.step-indicator');
+            stepIndicators.forEach((step, index) => {
+                setTimeout(() => {
+                    step.classList.add('step-active');
+                    setTimeout(() => step.classList.remove('step-active'), 500);
+                }, index * 200);
+            });
+        });
+
+        // Copy function
+        copyBtn.addEventListener('click', () => {
+            outputText.select();
+            document.execCommand('copy');
+            copyBtn.textContent = '✅ Copied!';
+            setTimeout(() => {
+                copyBtn.textContent = '📋 Copy';
+            }, 2000);
+        });
+
+        // Clear function
+        clearBtn.addEventListener('click', () => {
+            inputText.value = '';
+            outputText.value = '';
+            stepsDisplay.classList.add('hidden');
+            document.querySelectorAll('[id$="Result"]').forEach(el => el.textContent = '');
+        });
+
+        // Initialize
+        updateStepsOrder();
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9893369de7ad0452',t:'MTc1OTU2NTUzNy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
